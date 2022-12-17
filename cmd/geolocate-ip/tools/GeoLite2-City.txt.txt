@@ -1,0 +1,1 @@
+Put GeoLite2-City.mmdb file in this folder.
