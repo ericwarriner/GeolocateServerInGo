@@ -17,8 +17,6 @@ type Objec struct {
 }
 
 func setupRouter() *gin.Engine {
-	// Disable Console Color
-	// gin.DisableConsoleColor()
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
@@ -27,12 +25,21 @@ func setupRouter() *gin.Engine {
 		c.String(http.StatusOK, "healthz")
 	})
 
+	// Get ClientIP address
+	r.GET("/clientIP", func(c *gin.Context) {
+		var ok = checkIPAddress(c.ClientIP())
+
+		if ok {
+			c.JSON(http.StatusOK, maxmindLookup(c.ClientIP()))
+		} else {
+			c.JSON(http.StatusOK, gin.H{"error": "error"})
+		}
+	})
+
 	// Get user value
 	r.GET("/ip/:ip", func(c *gin.Context) {
 		var ipp = c.Params.ByName("ip")
 		var ok = checkIPAddress(ipp)
-		//valiIPV6 := "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
-		//checkIPAddress(valiIPV6)
 
 		if ok {
 			c.JSON(http.StatusOK, maxmindLookup(ipp))
