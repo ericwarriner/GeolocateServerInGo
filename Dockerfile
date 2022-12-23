@@ -31,14 +31,16 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /geolocate
 
 # Use a Docker multi-stage build to create a lean production image.
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
-FROM gcr.io/distroless/base-debian11
+FROM gcr.io/distroless/static-debian11
 
 # Change the working directory.
 WORKDIR /
 
 # Copy the binary to the production image from the builder stage.
 COPY --from=builder /geolocate /geolocate
-COPY ./cmd/geolocate-ip/tools/GeoLite2-City.mmdb /cmd/geolocate-ip/tools/
+COPY ./cmd/geolocate-ip/tools/* /cmd/geolocate-ip/tools/
+COPY ./files/* /cmd/geolocate-ip/files/
+
 EXPOSE 8080
 # Run the web service on container startup.
 USER nonroot:nonroot

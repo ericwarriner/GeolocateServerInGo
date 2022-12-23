@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -14,20 +15,27 @@ type Objec struct {
 	CountryName string
 	Latitude    float64
 	Longitude   float64
+	Ipaddress   string
 }
 
 func setupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-
 	// Ping test
-	r.GET("/healthz", func(c *gin.Context) {
-		c.String(http.StatusOK, "healthz")
+	r.GET("/healthcheck", func(c *gin.Context) {
+		c.String(http.StatusOK, "OK")
 	})
 
 	// Get ClientIP address
 	r.GET("/clientIP", func(c *gin.Context) {
 		var ok = checkIPAddress(c.ClientIP())
+		//Debugging related to issue where ClientIP did not return actual IP address.
+		// https://github.com/gin-gonic/gin/issues/2697
+		fmt.Println("The clientIP", c.ClientIP())
+		//fmt.Println("The RemoteIP", c.RemoteIP())
+		//fmt.Println("The RemoteAddress", c.Request.RemoteAddr)
+		//fmt.Println("The Referer", c.Request.Referer())
+		//fmt.Println("The Header", c.Request.Header)
 
 		if ok {
 			c.JSON(http.StatusOK, maxmindLookup(c.ClientIP()))
@@ -53,6 +61,8 @@ func setupRouter() *gin.Engine {
 
 func main() {
 	r := setupRouter()
+	r.StaticFile("/favicon.ico", "./cmd/geolocate-ip/files/favicon.ico")
+	r.StaticFile("/", "./cmd/geolocate-ip/files/index.html")
 	// Listen and Server in 0.0.0.0:8080
 	r.Run(":8080")
 }
@@ -76,6 +86,7 @@ func maxmindLookup(ipaddress string) Objec {
 	defer db.Close()
 	ip := net.ParseIP(ipaddress)
 	record, err := db.City(ip)
-	return Objec{CityName: record.City.Names["en"], CountryName: record.Country.Names["en"], Latitude: record.Location.Latitude, Longitude: record.Location.Longitude}
+
+	return Objec{CityName: record.City.Names["en"], CountryName: record.Country.Names["en"], Latitude: record.Location.Latitude, Longitude: record.Location.Longitude, Ipaddress: ipaddress}
 
 }
