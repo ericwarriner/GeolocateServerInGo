@@ -22,6 +22,7 @@ WORKDIR /app
 RUN go mod init geolocate
 RUN go get github.com/gin-gonic/gin
 RUN go get github.com/oschwald/geoip2-golang
+RUN go get github.com/gin-contrib/cors
 
 # Copy local code to the container image.
 COPY ./cmd/geolocate-ip/*.go ./

@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/oschwald/geoip2-golang"
 )
@@ -21,6 +22,7 @@ type Objec struct {
 func setupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+	r.Use(cors.Default())
 	// Ping test
 	r.GET("/healthcheck", func(c *gin.Context) {
 		c.String(http.StatusOK, "OK")
